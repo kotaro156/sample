@@ -124,14 +124,23 @@ $(function() {
         } else if ($section.hasClass('bg-charcoal')) {
             bgColor = '#2f2f2f';
             fontColor = '#ffffff';
+        } else if ($section.hasClass('bg-slate')) {
+            bgColor = '#5B6D7A';
+            fontColor = '#ffffff';
+        } else if ($section.hasClass('bg-ivory')) {
+            bgColor = '#F6EFE6';
+            fontColor = '#2f2f2f';
+        } else if ($section.hasClass('bg-bronze')) {
+            bgColor = '#B08D57';
+            fontColor = '#ffffff';
         }
 
         document.documentElement.style.setProperty('--scroll-bg-color', bgColor);
         document.documentElement.style.setProperty('--scroll-font-color', fontColor);
     }, observerOptions);
 
-    // セクション要素をすべて監視
-    $('article, footer').each(function() {
+    // セクション要素をすべて監視（トップ MV も含める）
+    $('.top_mv, article, footer').each(function() {
         sectionObserver.observe(this);
     });
 

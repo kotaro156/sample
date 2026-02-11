@@ -23,6 +23,9 @@
 	--color-deep-navy: #0f2340;
 	--color-emerald: #2a9d8f;
 	--color-charcoal: #2f2f2f;
+	--color-slate: #5B6D7A;
+	--color-ivory: #F6EFE6;
+	--color-bronze: #B08D57;
 }
 
 
@@ -1962,6 +1965,28 @@ a.no_line { text-decoration:none!important; }
 	transition: background-color 0.5s ease, color 0.5s ease;
 }
 .bg-charcoal a { color: #ffffff; }
+
+/* 追加バリエーション */
+.bg-slate {
+	background-color: var(--color-slate);
+	color: #ffffff;
+	transition: background-color 0.5s ease, color 0.5s ease;
+}
+.bg-slate a { color: #ffffff; }
+
+.bg-ivory {
+	background-color: var(--color-ivory);
+	color: var(--color-charcoal);
+	transition: background-color 0.5s ease, color 0.5s ease;
+}
+.bg-ivory a { color: var(--color-charcoal); }
+
+.bg-bronze {
+	background-color: var(--color-bronze);
+	color: #ffffff;
+	transition: background-color 0.5s ease, color 0.5s ease;
+}
+.bg-bronze a { color: #ffffff; }
 
 /* ▼リップルエフェクト▼ */
 /* ▼form▼ */
