@@ -1761,6 +1761,58 @@ a.no_line { text-decoration:none!important; }
 }
 .btn_02{ border:1px #cdcdcd solid; }
 
+/* ▼ボタンのセクション別スタイル▼ */
+.bg-navy-blue .btn_01 {
+	background-color: var(--color-gold);
+	color: #1F3A52;
+}
+
+.bg-gold .btn_01 {
+	background-color: var(--color-navy-blue);
+	color: #ffffff;
+}
+
+.bg-navy-blue .btn_02 {
+	border: 1px var(--color-gold) solid;
+	color: var(--color-gold);
+}
+
+.bg-navy-blue .btn_02:hover {
+	background-color: var(--color-gold);
+	color: #1F3A52;
+}
+
+.bg-gold .btn_02 {
+	border: 1px var(--color-navy-blue) solid;
+	color: var(--color-navy-blue);
+}
+
+.bg-gold .btn_02:hover {
+	background-color: var(--color-navy-blue);
+	color: #ffffff;
+}
+
+/* ▼セクション別ボーダーカラー▼ */
+.bg-navy-blue .column_date .cate {
+	background-color: rgba(201, 169, 97, 0.2);
+	border: 1px solid var(--color-gold);
+}
+
+.bg-gold .column_date .cate {
+	background-color: rgba(31, 58, 82, 0.2);
+	border: 1px solid var(--color-navy-blue);
+}
+
+.bg-navy-blue .news_date .cate {
+	background-color: rgba(201, 169, 97, 0.3);
+	color: var(--color-gold);
+}
+
+.bg-gold .news_date .cate {
+	background-color: rgba(31, 58, 82, 0.3);
+	color: var(--color-navy-blue);
+}
+
 @media screen and (min-width: 751px) {
 	.btn_01,
 	.btn_02{
@@ -1847,5 +1899,44 @@ a.no_line { text-decoration:none!important; }
 	pointer-events: none;
 }
 
+/* ▼SECTION BACKGROUND COLORS▼ */
+.bg-navy-blue {
+	background-color: var(--color-navy-blue);
+	color: #ffffff;
+	transition: background-color 0.5s ease, color 0.5s ease;
+}
 
+.bg-navy-blue a {
+	color: #ffffff;
+}
+
+.bg-navy-blue .title_01 h2,
+.bg-navy-blue .title_01 h3 {
+	color: #ffffff;
+}
+
+.bg-navy-blue h3 {
+	color: #ffffff;
+}
+
+.bg-gold {
+	background-color: var(--color-gold);
+	color: #1F3A52;
+	transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+.bg-gold a {
+	color: #1F3A52;
+}
+
+.bg-gold .title_01 h2,
+.bg-gold .title_01 h3 {
+	color: #1F3A52;
+}
+
+.bg-gold h3 {
+	color: #1F3A52;
+}
+
+/* ▼リップルエフェクト▼ */
 /* ▼form▼ */

@@ -89,36 +89,43 @@ $(function() {
     const handleResize = debounce(setVh, 100);
     $(window).on('resize orientationchange', handleResize);
 
-    // 5. スクロール時の背景色動的変化 (白 → ネイビーブルー → ゴールド)
-    // ページの高さと各セクションの位置を基に色を変化させる
-    const updateBackgroundColor = () => {
-        const scrollTop = $(window).scrollTop();
-        const docHeight = $(document).height() - $(window).height();
-        const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-
-        let bgColor, fontColor;
-
-        // スクロール率に応じて色を決定
-        if (scrollPercent < 33) {
-            // 0-33%: 白
-            bgColor = '#ffffff';
-            fontColor = '#4d4d4d';
-        } else if (scrollPercent < 66) {
-            // 33-66%: ネイビーブルーへのグラデーション
-            bgColor = '#1F3A52';
-            fontColor = '#ffffff';
-        } else {
-            // 66-100%: ゴールド
-            bgColor = '#C9A961';
-            fontColor = '#1F3A52';
-        }
-
-        // CSS 変数を更新
-        document.documentElement.style.setProperty('--scroll-bg-color', bgColor);
-        document.documentElement.style.setProperty('--scroll-font-color', fontColor);
+    // 5. スクロール時の背景色動的変化 (セクション別背景色の Intersection Observer)
+    // セクションが viewport に入ると自動的に背景色が変わる
+    const observerOptions = {
+        threshold: 0.3 // セクションの30%が見えたら発動
     };
 
-    $(window).on('scroll', debounce(updateBackgroundColor, 50));
+    const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const $section = $(entry.target);
+                
+                // セクションのクラスから背景色情報を取得
+                let bgColor, fontColor;
+                
+                if ($section.hasClass('bg-navy-blue')) {
+                    bgColor = '#1F3A52';
+                    fontColor = '#ffffff';
+                } else if ($section.hasClass('bg-gold')) {
+                    bgColor = '#C9A961';
+                    fontColor = '#1F3A52';
+                } else {
+                    // デフォルト（白）
+                    bgColor = '#ffffff';
+                    fontColor = '#4d4d4d';
+                }
+                
+                // body の CSS 変数を更新（スムーズなトランジション）
+                document.documentElement.style.setProperty('--scroll-bg-color', bgColor);
+                document.documentElement.style.setProperty('--scroll-font-color', fontColor);
+            }
+        });
+    }, observerOptions);
+
+    // セクション要素をすべて監視
+    $('article, footer').each(function() {
+        sectionObserver.observe(this);
+    });
 
     // 6. リップルエフェクト (タッチ・クリックで波紋が広がる)
     const createRipple = (e) => {
