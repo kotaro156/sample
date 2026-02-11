@@ -89,60 +89,122 @@ $(function() {
     const handleResize = debounce(setVh, 100);
     $(window).on('resize orientationchange', handleResize);
 
-    // 5. スクロール時の背景色動的変化 (セクション別背景色の Intersection Observer)
-    // セクションが viewport に入ると自動的に背景色が変わる
-    const observerOptions = {
-        threshold: 0.3 // セクションの30%が見えたら発動
+    // 5. スクロール時の背景色動的変化（スムーズな補間）
+    // 各セクションの中心位置に基づき、現在のビューポート中心がどの区間にあるかを求め
+    // 隣接するセクション間で線形補間して背景色を滑らかに変化させる
+    const colorMap = {
+        'bg-white': '#ffffff',
+        'bg-navy-blue': '#1F3A52',
+        'bg-deep-navy': '#0f2340',
+        'bg-gold': '#C9A961',
+        'bg-emerald': '#2a9d8f',
+        'bg-charcoal': '#2f2f2f',
+        'bg-slate': '#5B6D7A',
+        'bg-ivory': '#F6EFE6',
+        'bg-bronze': '#B08D57'
     };
 
-    const sectionObserver = new IntersectionObserver((entries) => {
-        // 可視領域が最大の要素を選んで背景色を決定する
-        const visible = entries.filter(e => e.isIntersecting);
-        if (visible.length === 0) return;
+    const fontColorMap = {
+        '#ffffff': '#4d4d4d', // default mapping (not used directly)
+    };
 
-        let topEntry = visible.reduce((a, b) => (a.intersectionRatio > b.intersectionRatio ? a : b));
-        const $section = $(topEntry.target);
+    const hexToRgb = (hex) => {
+        hex = hex.replace('#','');
+        if (hex.length === 3) hex = hex.split('').map(h=>h+h).join('');
+        const bigint = parseInt(hex, 16);
+        return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
+    };
 
-        let bgColor = '#ffffff';
-        let fontColor = '#4d4d4d';
+    const rgbToHex = (r,g,b) => {
+        return '#' + [r,g,b].map(v => { const s = v.toString(16); return s.length==1? '0'+s : s; }).join('');
+    };
 
-        if ($section.hasClass('bg-white')) {
-            bgColor = '#ffffff';
-            fontColor = '#4d4d4d';
-        } else if ($section.hasClass('bg-navy-blue')) {
-            bgColor = '#1F3A52';
-            fontColor = '#ffffff';
-        } else if ($section.hasClass('bg-deep-navy')) {
-            bgColor = '#0f2340';
-            fontColor = '#ffffff';
-        } else if ($section.hasClass('bg-gold')) {
-            bgColor = '#C9A961';
-            fontColor = '#1F3A52';
-        } else if ($section.hasClass('bg-emerald')) {
-            bgColor = '#2a9d8f';
-            fontColor = '#ffffff';
-        } else if ($section.hasClass('bg-charcoal')) {
-            bgColor = '#2f2f2f';
-            fontColor = '#ffffff';
-        } else if ($section.hasClass('bg-slate')) {
-            bgColor = '#5B6D7A';
-            fontColor = '#ffffff';
-        } else if ($section.hasClass('bg-ivory')) {
-            bgColor = '#F6EFE6';
-            fontColor = '#2f2f2f';
-        } else if ($section.hasClass('bg-bronze')) {
-            bgColor = '#B08D57';
-            fontColor = '#ffffff';
+    const lerp = (a,b,t) => Math.round(a + (b - a) * t);
+
+    let sections = [];
+    const buildSections = () => {
+        sections = [];
+        $('.top_mv, article, footer').each(function(){
+            const el = this;
+            const rect = el.getBoundingClientRect();
+            const centerPageY = window.scrollY + rect.top + rect.height/2;
+            // find class key
+            let key = null;
+            Object.keys(colorMap).some(k => { if ($(el).hasClass(k)) { key = k; return true;} return false; });
+            if (!key) key = 'bg-white';
+            sections.push({el, centerPageY, color: colorMap[key], fontColor: (key==='bg-ivory' ? '#2f2f2f' : (key==='bg-gold' ? '#1F3A52' : (key==='bg-ivory' ? '#2f2f2f' : '#ffffff')))});
+        });
+        // sort by centerPageY
+        sections.sort((a,b)=>a.centerPageY - b.centerPageY);
+    };
+
+    buildSections();
+
+    let needsUpdate = true;
+    let rafId = null;
+
+    const updateBlend = () => {
+        needsUpdate = false;
+        const viewportCenter = window.scrollY + window.innerHeight/2;
+
+        if (sections.length === 0) return;
+
+        // if before first or after last
+        if (viewportCenter <= sections[0].centerPageY) {
+            document.documentElement.style.setProperty('--scroll-bg-color', sections[0].color);
+            document.documentElement.style.setProperty('--scroll-font-color', sections[0].fontColor || '#4d4d4d');
+            return;
+        }
+        if (viewportCenter >= sections[sections.length-1].centerPageY) {
+            const last = sections[sections.length-1];
+            document.documentElement.style.setProperty('--scroll-bg-color', last.color);
+            document.documentElement.style.setProperty('--scroll-font-color', last.fontColor || '#4d4d4d');
+            return;
         }
 
-        document.documentElement.style.setProperty('--scroll-bg-color', bgColor);
-        document.documentElement.style.setProperty('--scroll-font-color', fontColor);
-    }, observerOptions);
+        // find surrounding sections
+        let i = 0;
+        while (i < sections.length - 1 && viewportCenter > sections[i+1].centerPageY) i++;
+        const A = sections[i];
+        const B = sections[i+1];
+        const span = B.centerPageY - A.centerPageY;
+        const t = span === 0 ? 0 : Math.min(Math.max((viewportCenter - A.centerPageY) / span, 0), 1);
 
-    // セクション要素をすべて監視（トップ MV も含める）
-    $('.top_mv, article, footer').each(function() {
-        sectionObserver.observe(this);
-    });
+        const ca = hexToRgb(A.color);
+        const cb = hexToRgb(B.color);
+        const cr = lerp(ca[0], cb[0], t);
+        const cg = lerp(ca[1], cb[1], t);
+        const cbv = lerp(ca[2], cb[2], t);
+        const blended = rgbToHex(cr,cg,cbv);
+
+        // font color: simple pick based on t (could be improved)
+        const fa = A.fontColor || (A.color === '#ffffff' ? '#4d4d4d' : '#ffffff');
+        const fb = B.fontColor || (B.color === '#ffffff' ? '#4d4d4d' : '#ffffff');
+        // convert to rgb
+        const fA = hexToRgb(fa.replace('#','')) || hexToRgb(fa.replace('#',''));
+        const fB = hexToRgb(fb.replace('#','')) || hexToRgb(fb.replace('#',''));
+        const fr = lerp(fA[0], fB[0], t);
+        const fg = lerp(fA[1], fB[1], t);
+        const fb2 = lerp(fA[2], fB[2], t);
+        const fBlended = rgbToHex(fr,fg,fb2);
+
+        document.documentElement.style.setProperty('--scroll-bg-color', blended);
+        document.documentElement.style.setProperty('--scroll-font-color', fBlended);
+    };
+
+    const scheduleUpdate = () => {
+        if (!needsUpdate) {
+            needsUpdate = true;
+            rafId = requestAnimationFrame(() => {
+                updateBlend();
+                needsUpdate = false;
+            });
+        }
+    };
+
+    $(window).on('scroll', scheduleUpdate);
+    $(window).on('resize', () => { buildSections(); scheduleUpdate(); });
+
 
     // 6. リップルエフェクト (タッチ・クリックで波紋が広がる)
     const createRipple = (e) => {
