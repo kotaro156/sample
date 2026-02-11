@@ -96,30 +96,38 @@ $(function() {
     };
 
     const sectionObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const $section = $(entry.target);
-                
-                // セクションのクラスから背景色情報を取得
-                let bgColor, fontColor;
-                
-                if ($section.hasClass('bg-navy-blue')) {
-                    bgColor = '#1F3A52';
-                    fontColor = '#ffffff';
-                } else if ($section.hasClass('bg-gold')) {
-                    bgColor = '#C9A961';
-                    fontColor = '#1F3A52';
-                } else {
-                    // デフォルト（白）
-                    bgColor = '#ffffff';
-                    fontColor = '#4d4d4d';
-                }
-                
-                // body の CSS 変数を更新（スムーズなトランジション）
-                document.documentElement.style.setProperty('--scroll-bg-color', bgColor);
-                document.documentElement.style.setProperty('--scroll-font-color', fontColor);
-            }
-        });
+        // 可視領域が最大の要素を選んで背景色を決定する
+        const visible = entries.filter(e => e.isIntersecting);
+        if (visible.length === 0) return;
+
+        let topEntry = visible.reduce((a, b) => (a.intersectionRatio > b.intersectionRatio ? a : b));
+        const $section = $(topEntry.target);
+
+        let bgColor = '#ffffff';
+        let fontColor = '#4d4d4d';
+
+        if ($section.hasClass('bg-white')) {
+            bgColor = '#ffffff';
+            fontColor = '#4d4d4d';
+        } else if ($section.hasClass('bg-navy-blue')) {
+            bgColor = '#1F3A52';
+            fontColor = '#ffffff';
+        } else if ($section.hasClass('bg-deep-navy')) {
+            bgColor = '#0f2340';
+            fontColor = '#ffffff';
+        } else if ($section.hasClass('bg-gold')) {
+            bgColor = '#C9A961';
+            fontColor = '#1F3A52';
+        } else if ($section.hasClass('bg-emerald')) {
+            bgColor = '#2a9d8f';
+            fontColor = '#ffffff';
+        } else if ($section.hasClass('bg-charcoal')) {
+            bgColor = '#2f2f2f';
+            fontColor = '#ffffff';
+        }
+
+        document.documentElement.style.setProperty('--scroll-bg-color', bgColor);
+        document.documentElement.style.setProperty('--scroll-font-color', fontColor);
     }, observerOptions);
 
     // セクション要素をすべて監視

@@ -20,6 +20,9 @@
 	--color-ripple-blue: rgba(31, 58, 82, 0.5);
 	--scroll-bg-color: #fff;
 	--scroll-font-color: #4d4d4d;
+	--color-deep-navy: #0f2340;
+	--color-emerald: #2a9d8f;
+	--color-charcoal: #2f2f2f;
 }
 
 
@@ -1937,6 +1940,28 @@ a.no_line { text-decoration:none!important; }
 .bg-gold h3 {
 	color: #1F3A52;
 }
+
+/* 追加のバリエーションクラス */
+.bg-deep-navy {
+	background-color: var(--color-deep-navy);
+	color: #ffffff;
+	transition: background-color 0.5s ease, color 0.5s ease;
+}
+.bg-deep-navy a { color: #ffffff; }
+
+.bg-emerald {
+	background-color: var(--color-emerald);
+	color: #ffffff;
+	transition: background-color 0.5s ease, color 0.5s ease;
+}
+.bg-emerald a { color: #ffffff; }
+
+.bg-charcoal {
+	background-color: var(--color-charcoal);
+	color: #ffffff;
+	transition: background-color 0.5s ease, color 0.5s ease;
+}
+.bg-charcoal a { color: #ffffff; }
 
 /* ▼リップルエフェクト▼ */
 /* ▼form▼ */
