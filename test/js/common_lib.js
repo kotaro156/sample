@@ -88,4 +88,70 @@ $(function() {
     // resizeとorientationchangeイベントにもデバウンス処理を適用
     const handleResize = debounce(setVh, 100);
     $(window).on('resize orientationchange', handleResize);
+
+    // 5. スクロール時の背景色動的変化 (白 → ネイビーブルー → ゴールド)
+    // ページの高さと各セクションの位置を基に色を変化させる
+    const updateBackgroundColor = () => {
+        const scrollTop = $(window).scrollTop();
+        const docHeight = $(document).height() - $(window).height();
+        const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+
+        let bgColor, fontColor;
+
+        // スクロール率に応じて色を決定
+        if (scrollPercent < 33) {
+            // 0-33%: 白
+            bgColor = '#ffffff';
+            fontColor = '#4d4d4d';
+        } else if (scrollPercent < 66) {
+            // 33-66%: ネイビーブルーへのグラデーション
+            bgColor = '#1F3A52';
+            fontColor = '#ffffff';
+        } else {
+            // 66-100%: ゴールド
+            bgColor = '#C9A961';
+            fontColor = '#1F3A52';
+        }
+
+        // CSS 変数を更新
+        document.documentElement.style.setProperty('--scroll-bg-color', bgColor);
+        document.documentElement.style.setProperty('--scroll-font-color', fontColor);
+    };
+
+    $(window).on('scroll', debounce(updateBackgroundColor, 50));
+
+    // 6. リップルエフェクト (タッチ・クリックで波紋が広がる)
+    const createRipple = (e) => {
+        const $ripple = $('<span class="ripple"></span>');
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.pageX || e.touches[0].pageX - $(window).scrollLeft();
+        const y = e.pageY || e.touches[0].pageY - $(window).scrollTop();
+
+        // リップル位置を計算
+        const offsetX = x - rect.left;
+        const offsetY = y - rect.top;
+
+        $ripple.css({
+            left: offsetX + 'px',
+            top: offsetY + 'px',
+            marginLeft: '-150px',
+            marginTop: '-150px'
+        });
+
+        $(e.currentTarget).css('position', 'relative').append($ripple);
+
+        // アニメーション完了後に要素を削除
+        setTimeout(() => {
+            $ripple.remove();
+        }, 600);
+    };
+
+    // ドキュメント全体にリップルエフェクトを適用
+    $(document).on('click touchstart', function(e) {
+        // ボタンやインタラクティブ要素でのみ効果を発動
+        if (!$(e.target).closest('[role="button"], button, a, input, select, textarea').length &&
+            !$(e.target).is('[role="button"], button, a, input, select, textarea')) {
+            createRipple(e);
+        }
+    });
 });
